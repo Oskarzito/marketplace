@@ -7,7 +7,7 @@ A small SwiftUI app that shows ads from a remote JSON feed. Any ad can be favori
 
 ## The solution
 
-Ads load into a lazy, adaptive grid (two columns on a phone, one at accessibility text sizes). Each card shows photo, title, price and location. Tapping the heart saves the ad **and its image bytes** to disk, so the Favorites tab can be shown with no network at all. The feed's failure never affects Favorites.
+Ads load into a lazy, adaptive grid (two columns on a phone, one at accessibility text sizes). Each card shows photo, title, price and location, and tapping a card opens a details screen. Tapping the heart saves the ad **and its image bytes** to disk, so the Favorites tab can be shown with no network at all. The feed's failure never affects Favorites.
 
 ```
 Models/       Ad               what the app shows and saves
@@ -17,7 +17,7 @@ Services/     AdsService       protocol + URLSession implementation
               FavoritesStore   protocol + JSON-file actor
               ImageLoader      actor: memory cache, off-main decoding
 ViewModels/   AdsViewModel     combines the service and the store
-Views/        AdsListView, AdCardView, AdImageView
+Views/        AdsListView, AdCardView, AdDetailView, AdImageView, FavoriteButton
 ```
 
 There is deliberately no repository layer: the view model combines two small protocols, and a repository would only forward calls.
@@ -49,7 +49,7 @@ Loads started by `.task` are cancelled with the view, and cancellation is not sh
 ## What I am particularly proud of
 
 - Favorites really work offline: the saved record is self-contained (data and image), and the tab does not depend on the feed.
-- The code is small (about 600 lines) and each type has one job, with protocol seams at the two places that do I/O.
+- The code is small (about 700 lines) and each type has one job, with protocol seams at the two places that do I/O.
 - Concurrency isolation is explicit and explained instead of relying on the build setting.
 
 ## What could have been done better
@@ -64,7 +64,7 @@ Loads started by `.task` are cancelled with the view, and cancellation is not sh
 ## With more time
 
 - Pagination, once the API supports it.
-- A detail screen using the fields the feed already has (`content`, `categories`, `shippingOption`).
+- A richer details screen. It shows the same data as the card, larger. The feed also has type-specific fields (company, employment type and published age for jobs, total price for real estate, shipping option) that it could show, and a sharper image: the CDN also serves 960x720 photos.
 - De-duplicating in-flight image requests, a disk cache, and remembering failed URLs.
 - Retrying to save a favorite's image, and refreshing saved snapshots after each fetch.
 - Unit tests, UI tests, localized strings, an iPad layout, and haptics on the heart.
