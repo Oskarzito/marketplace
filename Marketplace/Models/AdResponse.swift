@@ -83,19 +83,23 @@ nonisolated struct AdResponse: Decodable, Sendable {
 }
 
 nonisolated extension Ad {
-    /// Image paths in the feed are relative to this CDN base, which also crops to 4:3.
-    private static let imageBaseURL = URL(string: "https://images.finncdn.no/dynamic/480x360c/")!
+    /// Image paths in the feed are relative to a CDN base. Photos use the base from the brief, which crops to 4:3.
+    private static let photoBaseURL = URL(string: "https://images.finncdn.no/dynamic/480x360c/")!
+    /// That crop clips wide logos, so they are requested at their own aspect ratio instead.
+    /// Not in the brief: found by testing the CDN.
+    private static let logoBaseURL = URL(string: "https://images.finncdn.no/dynamic/480w/")!
 
     init(response: AdResponse) {
+        let imageStyle: ImageStyle = response.image?.type == "LOGO" ? .logo : .photo
+        let imageBaseURL = imageStyle == .logo ? Self.logoBaseURL : Self.photoBaseURL
         self.init(
             id: response.id,
             // Only `id` and `ad-type` are guaranteed by the backend, so an untitled ad is shown rather than dropped.
             title: response.description ?? "",
             location: response.location,
             price: response.price?.value,
-            imageURL: response.image?.url.map { Self.imageBaseURL.appending(path: $0) },
-            // Logos are small transparent PNGs and need different layout than photos.
-            imageStyle: response.image?.type == "LOGO" ? .logo : .photo
+            imageURL: response.image?.url.map { imageBaseURL.appending(path: $0) },
+            imageStyle: imageStyle
         )
     }
 }
