@@ -1,9 +1,5 @@
 import SwiftUI
 
-extension EnvironmentValues {
-    @Entry var imageLoader = ImageLoader.shared
-}
-
 struct AdImageView: View {
     private enum Phase {
         case loading
@@ -16,7 +12,6 @@ struct AdImageView: View {
     let storedData: Data?
     let style: Ad.ImageStyle
 
-    @Environment(\.imageLoader) private var imageLoader
     @State private var phase: Phase = .loading
 
     var body: some View {
@@ -56,9 +51,9 @@ struct AdImageView: View {
     private func load() async {
         do {
             if let storedData {
-                phase = .loaded(try await imageLoader.image(from: storedData))
+                phase = .loaded(try await ImageLoader.shared.image(from: storedData))
             } else if let url {
-                phase = .loaded(try await imageLoader.image(for: url))
+                phase = .loaded(try await ImageLoader.shared.image(for: url))
             } else {
                 phase = .failed
             }
