@@ -15,6 +15,8 @@ actor ImageLoader {
     }
 
     func image(from data: Data) async throws -> UIImage {
+        // UIKit normally decodes an image lazily on first draw, which can mean on the main
+        // thread in the middle of scrolling. Decoding here keeps that work off the main thread.
         guard let image = await UIImage(data: data)?.byPreparingForDisplay() else {
             throw URLError(.cannotDecodeContentData)
         }
