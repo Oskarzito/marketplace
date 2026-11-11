@@ -19,6 +19,9 @@ struct AdsListView: View {
             content
                 // Cards sit on a grouped background so they stand out, whatever colour their image has.
                 .background(Color(uiColor: .systemGroupedBackground))
+                .navigationDestination(for: Ad.self) { ad in
+                    AdDetailView(ad: ad, viewModel: viewModel)
+                }
                 .navigationTitle("Marketplace")
                 // A large title collapses while scrolling and slides under the picker below it.
                 .navigationBarTitleDisplayMode(.inline)
