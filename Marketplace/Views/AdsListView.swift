@@ -18,6 +18,8 @@ struct AdsListView: View {
                 .navigationTitle("Marketplace")
         }
         .task {
+            // Favorites come from disk and are quick; load them first so hearts are right before the network answers.
+            await viewModel.loadFavorites()
             await viewModel.loadAds()
         }
     }
@@ -41,7 +43,11 @@ struct AdsListView: View {
             ScrollView {
                 LazyVGrid(columns: columns, spacing: 16) {
                     ForEach(viewModel.ads) { ad in
-                        AdCardView(ad: ad)
+                        AdCardView(
+                            ad: ad,
+                            isFavorite: viewModel.isFavorite(ad),
+                            onToggleFavorite: { viewModel.toggleFavorite(ad) }
+                        )
                     }
                 }
                 .padding(.horizontal, 16)
@@ -64,5 +70,11 @@ struct AdsListView: View {
         }
     }
 
-    return AdsListView(viewModel: AdsViewModel(service: StubAdsService()))
+    nonisolated struct StubFavoritesStore: FavoritesStore {
+        func loadAll() async -> [Favorite] { [] }
+        func add(_ ad: Ad, imageData: Data?) async throws {}
+        func remove(id: Ad.ID) async throws {}
+    }
+
+    return AdsListView(viewModel: AdsViewModel(service: StubAdsService(), store: StubFavoritesStore()))
 }

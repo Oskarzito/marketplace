@@ -12,12 +12,17 @@ final class AdsViewModel {
     }
 
     private(set) var ads: [Ad] = []
+    private(set) var favorites: [Favorite] = []
     private(set) var loadState: LoadState = .idle
 
     private let service: any AdsService
+    private let store: any FavoritesStore
+    private let imageLoader: ImageLoader
 
-    init(service: any AdsService) {
+    init(service: any AdsService, store: any FavoritesStore, imageLoader: ImageLoader = .shared) {
         self.service = service
+        self.store = store
+        self.imageLoader = imageLoader
     }
 
     func loadAds() async {
@@ -38,5 +43,56 @@ final class AdsViewModel {
             // A cancelled load (the view went away) is not an error worth showing.
             loadState = Task.isCancelled ? .idle : .failed(error.localizedDescription)
         }
+    }
+
+    func loadFavorites() async {
+        favorites = await store.loadAll()
+    }
+
+    func isFavorite(_ ad: Ad) -> Bool {
+        favorites.contains { $0.ad.id == ad.id }
+    }
+
+    func toggleFavorite(_ ad: Ad) {
+        if isFavorite(ad) {
+            removeFavorite(ad)
+        } else {
+            addFavorite(ad)
+        }
+    }
+
+    // The heart flips immediately; saving to disk happens afterwards.
+    private func addFavorite(_ ad: Ad) {
+        favorites.insert(Favorite(ad: ad, imageData: nil), at: 0)
+        Task {
+            let imageData = await imageData(for: ad)
+            // The user may have tapped the heart again while the image was downloading.
+            guard isFavorite(ad) else { return }
+            do {
+                try await store.add(ad, imageData: imageData)
+                if let index = favorites.firstIndex(where: { $0.ad.id == ad.id }) {
+                    favorites[index] = Favorite(ad: ad, imageData: imageData)
+                }
+            } catch {
+                await loadFavorites()
+            }
+        }
+    }
+
+    private func removeFavorite(_ ad: Ad) {
+        favorites.removeAll { $0.ad.id == ad.id }
+        Task {
+            do {
+                try await store.remove(id: ad.id)
+            } catch {
+                await loadFavorites()
+            }
+        }
+    }
+
+    // A favorite is still saved without its image if the download fails; the card shows a placeholder.
+    private func imageData(for ad: Ad) async -> Data? {
+        guard let url = ad.imageURL else { return nil }
+        return try? await imageLoader.data(for: url)
     }
 }
