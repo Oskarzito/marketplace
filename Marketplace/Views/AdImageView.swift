@@ -24,7 +24,8 @@ struct AdImageView: View {
         tileColor
             .aspectRatio(4 / 3, contentMode: .fit)
             .overlay { content }
-            .clipShape(RoundedRectangle(cornerRadius: 8))
+            // A "fill" image can overflow its tile. The card rounds the corners.
+            .clipped()
             .task(id: url) {
                 await load()
             }
@@ -32,7 +33,7 @@ struct AdImageView: View {
 
     // Logos are drawn for light backgrounds, so they always sit on white.
     private var tileColor: Color {
-        style == .logo ? .white : Color(uiColor: .secondarySystemBackground)
+        style == .logo ? .white : Color(uiColor: .tertiarySystemGroupedBackground)
     }
 
     @ViewBuilder

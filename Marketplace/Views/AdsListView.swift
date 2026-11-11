@@ -17,6 +17,8 @@ struct AdsListView: View {
     var body: some View {
         NavigationStack {
             content
+                // Cards sit on a grouped background so they stand out, whatever colour their image has.
+                .background(Color(uiColor: .systemGroupedBackground))
                 .navigationTitle("Marketplace")
                 .safeAreaInset(edge: .top) {
                     filterPicker

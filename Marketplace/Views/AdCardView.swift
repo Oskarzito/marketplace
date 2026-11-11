@@ -11,31 +11,37 @@ struct AdCardView: View {
     let onToggleFavorite: () -> Void
 
     var body: some View {
-        // The button sits beside the combined text element, not inside it, so VoiceOver keeps it as its own control.
+        // The button sits beside the combined card element, not inside it, so VoiceOver keeps it as its own control.
         ZStack(alignment: .topTrailing) {
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: 0) {
                 // The photo says nothing VoiceOver needs; the text below describes the ad.
                 AdImageView(url: ad.imageURL, storedData: imageData, style: ad.imageStyle)
                     .accessibilityHidden(true)
 
-                // Reserving two lines keeps card heights equal whatever the title length.
-                Text(ad.title)
-                    .font(.subheadline)
-                    .lineLimit(2, reservesSpace: true)
+                VStack(alignment: .leading, spacing: 6) {
+                    // Reserving two lines keeps card heights equal whatever the title length.
+                    Text(ad.title)
+                        .font(.subheadline)
+                        .lineLimit(2, reservesSpace: true)
 
-                if let price = ad.price {
-                    // `Text(_:format:)` would swap in the device locale and print "NOK" instead of "kr".
-                    Text(price.formatted(Self.priceFormat))
-                        .font(.subheadline.bold())
-                }
+                    if let price = ad.price {
+                        // `Text(_:format:)` would swap in the device locale and print "NOK" instead of "kr".
+                        Text(price.formatted(Self.priceFormat))
+                            .font(.subheadline.bold())
+                    }
 
-                if let location = ad.location {
-                    Label(location, systemImage: "mappin.and.ellipse")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                    if let location = ad.location {
+                        Label(location, systemImage: "mappin.and.ellipse")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                 }
+                .padding(10)
             }
-            .frame(maxWidth: .infinity, alignment: .topLeading)
+            // Fill the row height, so a card without a price line is as tall as its neighbour.
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .background(Color(uiColor: .secondarySystemGroupedBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 12))
             .accessibilityElement(children: .combine)
 
             favoriteButton
@@ -50,7 +56,7 @@ struct AdCardView: View {
                 .background(.regularMaterial, in: Circle())
         }
         .buttonStyle(.plain)
-        .padding(4)
+        .padding(6)
         .accessibilityLabel(isFavorite ? "Remove from favorites" : "Add to favorites")
     }
 }
