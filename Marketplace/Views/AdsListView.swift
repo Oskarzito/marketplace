@@ -20,6 +20,8 @@ struct AdsListView: View {
                 // Cards sit on a grouped background so they stand out, whatever colour their image has.
                 .background(Color(uiColor: .systemGroupedBackground))
                 .navigationTitle("Marketplace")
+                // A large title collapses while scrolling and slides under the picker below it.
+                .navigationBarTitleDisplayMode(.inline)
                 .safeAreaInset(edge: .top) {
                     filterPicker
                 }
