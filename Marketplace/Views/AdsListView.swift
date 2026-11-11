@@ -3,7 +3,14 @@ import SwiftUI
 struct AdsListView: View {
     let viewModel: AdsViewModel
 
-    private let columns = [GridItem(.adaptive(minimum: 160), spacing: 12)]
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
+    // At accessibility text sizes two columns are too narrow for the text, so use one.
+    private var columns: [GridItem] {
+        dynamicTypeSize.isAccessibilitySize
+            ? [GridItem(.flexible())]
+            : [GridItem(.adaptive(minimum: 160), spacing: 12)]
+    }
 
     var body: some View {
         NavigationStack {
