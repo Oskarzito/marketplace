@@ -52,7 +52,9 @@ struct AdsListView: View {
     private var allAdsContent: some View {
         switch viewModel.loadState {
         case .idle, .loading:
+            // Without filling the screen the picker inset attaches to the small spinner, mid-screen.
             ProgressView()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
         case .failed(let message):
             ContentUnavailableView {
                 Label("Couldn't load ads", systemImage: "wifi.slash")
