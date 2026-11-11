@@ -6,6 +6,7 @@ struct AdCardView: View {
         .precision(.fractionLength(0))
 
     let ad: Ad
+    let imageData: Data?
     let isFavorite: Bool
     let onToggleFavorite: () -> Void
 
@@ -14,7 +15,7 @@ struct AdCardView: View {
         ZStack(alignment: .topTrailing) {
             VStack(alignment: .leading, spacing: 6) {
                 // The photo says nothing VoiceOver needs; the text below describes the ad.
-                AdImageView(url: ad.imageURL, style: ad.imageStyle)
+                AdImageView(url: ad.imageURL, storedData: imageData, style: ad.imageStyle)
                     .accessibilityHidden(true)
 
                 // Reserving two lines keeps card heights equal whatever the title length.
@@ -64,6 +65,7 @@ struct AdCardView: View {
             imageURL: nil,
             imageStyle: .photo
         ),
+        imageData: nil,
         isFavorite: true,
         onToggleFavorite: {}
     )

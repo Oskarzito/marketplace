@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct AdsListView: View {
-    let viewModel: AdsViewModel
+    @Bindable var viewModel: AdsViewModel
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
@@ -16,6 +16,9 @@ struct AdsListView: View {
         NavigationStack {
             content
                 .navigationTitle("Marketplace")
+                .safeAreaInset(edge: .top) {
+                    filterPicker
+                }
         }
         .task {
             // Favorites come from disk and are quick; load them first so hearts are right before the network answers.
@@ -24,8 +27,29 @@ struct AdsListView: View {
         }
     }
 
+    private var filterPicker: some View {
+        Picker("Show", selection: $viewModel.filter) {
+            Text("All").tag(AdsViewModel.Filter.all)
+            Text("Favorites").tag(AdsViewModel.Filter.favorites)
+        }
+        .pickerStyle(.segmented)
+        .padding(.horizontal, 16)
+        .padding(.bottom, 8)
+        .background(.bar)
+    }
+
     @ViewBuilder
     private var content: some View {
+        switch viewModel.filter {
+        case .all:
+            allAdsContent
+        case .favorites:
+            favoritesContent
+        }
+    }
+
+    @ViewBuilder
+    private var allAdsContent: some View {
         switch viewModel.loadState {
         case .idle, .loading:
             ProgressView()
@@ -40,21 +64,40 @@ struct AdsListView: View {
                 }
             }
         case .loaded:
-            ScrollView {
-                LazyVGrid(columns: columns, spacing: 16) {
-                    ForEach(viewModel.ads) { ad in
-                        AdCardView(
-                            ad: ad,
-                            isFavorite: viewModel.isFavorite(ad),
-                            onToggleFavorite: { viewModel.toggleFavorite(ad) }
-                        )
-                    }
+            grid(of: viewModel.ads)
+                .refreshable {
+                    await viewModel.loadAds()
                 }
-                .padding(.horizontal, 16)
+        }
+    }
+
+    // Favorites are saved on the device, so this tab never depends on the load state of the feed.
+    @ViewBuilder
+    private var favoritesContent: some View {
+        if viewModel.favorites.isEmpty {
+            ContentUnavailableView(
+                "No favorites yet",
+                systemImage: "heart",
+                description: Text("Tap the heart on an ad to save it here.")
+            )
+        } else {
+            grid(of: viewModel.favorites.map(\.ad))
+        }
+    }
+
+    private func grid(of ads: [Ad]) -> some View {
+        ScrollView {
+            LazyVGrid(columns: columns, spacing: 16) {
+                ForEach(ads) { ad in
+                    AdCardView(
+                        ad: ad,
+                        imageData: viewModel.savedImageData(for: ad),
+                        isFavorite: viewModel.isFavorite(ad),
+                        onToggleFavorite: { viewModel.toggleFavorite(ad) }
+                    )
+                }
             }
-            .refreshable {
-                await viewModel.loadAds()
-            }
+            .padding(.horizontal, 16)
         }
     }
 }

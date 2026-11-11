@@ -11,6 +11,12 @@ final class AdsViewModel {
         case failed(String)
     }
 
+    enum Filter {
+        case all
+        case favorites
+    }
+
+    var filter: Filter = .all
     private(set) var ads: [Ad] = []
     private(set) var favorites: [Favorite] = []
     private(set) var loadState: LoadState = .idle
@@ -53,6 +59,11 @@ final class AdsViewModel {
         favorites.contains { $0.ad.id == ad.id }
     }
 
+    /// The image saved with a favorite, so it can be shown without the network.
+    func savedImageData(for ad: Ad) -> Data? {
+        favorites.first { $0.ad.id == ad.id }?.imageData
+    }
+
     func toggleFavorite(_ ad: Ad) {
         if isFavorite(ad) {
             removeFavorite(ad)
@@ -65,7 +76,7 @@ final class AdsViewModel {
     private func addFavorite(_ ad: Ad) {
         favorites.insert(Favorite(ad: ad, imageData: nil), at: 0)
         Task {
-            let imageData = await imageData(for: ad)
+            let imageData = await downloadImageData(for: ad)
             // The user may have tapped the heart again while the image was downloading.
             guard isFavorite(ad) else { return }
             do {
@@ -91,7 +102,7 @@ final class AdsViewModel {
     }
 
     // A favorite is still saved without its image if the download fails; the card shows a placeholder.
-    private func imageData(for ad: Ad) async -> Data? {
+    private func downloadImageData(for ad: Ad) async -> Data? {
         guard let url = ad.imageURL else { return nil }
         return try? await imageLoader.data(for: url)
     }
