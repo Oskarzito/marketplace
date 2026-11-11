@@ -1,12 +1,61 @@
 import SwiftUI
 
 struct AdsListView: View {
+    let viewModel: AdsViewModel
+
+    private let columns = [GridItem(.adaptive(minimum: 160), spacing: 12)]
+
     var body: some View {
-        Text("Hello, world!")
-            .padding()
+        NavigationStack {
+            content
+                .navigationTitle("Marketplace")
+        }
+        .task {
+            await viewModel.loadAds()
+        }
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        switch viewModel.loadState {
+        case .idle, .loading:
+            ProgressView()
+        case .failed(let message):
+            ContentUnavailableView {
+                Label("Couldn't load ads", systemImage: "wifi.slash")
+            } description: {
+                Text(message)
+            } actions: {
+                Button("Retry") {
+                    Task { await viewModel.loadAds() }
+                }
+            }
+        case .loaded:
+            ScrollView {
+                LazyVGrid(columns: columns, spacing: 16) {
+                    ForEach(viewModel.ads) { ad in
+                        AdCardView(ad: ad)
+                    }
+                }
+                .padding(.horizontal, 16)
+            }
+            .refreshable {
+                await viewModel.loadAds()
+            }
+        }
     }
 }
 
 #Preview {
-    AdsListView()
+    nonisolated struct StubAdsService: AdsService {
+        func fetchAds() async throws -> [Ad] {
+            [
+                Ad(id: "1", title: "Opel Astra 1,6 Automat", location: "Halden", price: 40000, imageURL: nil, imageStyle: .photo),
+                Ad(id: "2", title: "Juridisk skadebehandler", location: "Lysaker", price: nil, imageURL: nil, imageStyle: .logo),
+                Ad(id: "3", title: "Rundt spisebord", location: "Oslo", price: 500, imageURL: nil, imageStyle: .photo),
+            ]
+        }
+    }
+
+    return AdsListView(viewModel: AdsViewModel(service: StubAdsService()))
 }
