@@ -19,7 +19,8 @@ struct AdCardView: View {
                 .lineLimit(2, reservesSpace: true)
 
             if let price = ad.price {
-                Text(price, format: Self.priceFormat)
+                // `Text(_:format:)` would swap in the device locale and print "NOK" instead of "kr".
+                Text(price.formatted(Self.priceFormat))
                     .font(.subheadline.bold())
             }
 
