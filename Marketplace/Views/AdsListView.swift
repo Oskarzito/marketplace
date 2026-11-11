@@ -6,10 +6,12 @@ struct AdsListView: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     // At accessibility text sizes two columns are too narrow for the text, so use one.
+    // Top alignment: by default a card shorter than its row (an ad without a price) is centered,
+    // which pushes its image and heart below its neighbour's.
     private var columns: [GridItem] {
         dynamicTypeSize.isAccessibilitySize
-            ? [GridItem(.flexible())]
-            : [GridItem(.adaptive(minimum: 160), spacing: 12)]
+            ? [GridItem(.flexible(), alignment: .top)]
+            : [GridItem(.adaptive(minimum: 160), spacing: 12, alignment: .top)]
     }
 
     var body: some View {
