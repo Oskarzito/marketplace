@@ -5,19 +5,7 @@ struct AdCardView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            // The clear 4:3 shape fixes the size up front, so the layout doesn't jump as images arrive.
-            Color.clear
-                .aspectRatio(4 / 3, contentMode: .fit)
-                .overlay {
-                    AsyncImage(url: ad.imageURL) { image in
-                        image
-                            .resizable()
-                            .scaledToFill()
-                    } placeholder: {
-                        Color.secondary.opacity(0.15)
-                    }
-                }
-                .clipShape(RoundedRectangle(cornerRadius: 8))
+            AdImageView(url: ad.imageURL, style: ad.imageStyle)
 
             Text(ad.title)
                 .font(.subheadline)
