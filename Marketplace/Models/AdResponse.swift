@@ -1,8 +1,5 @@
 import Foundation
 
-// These types mirror the JSON field for field and do nothing else.
-// The app only ever uses `Ad`; `Ad(response:)` below is the single mapping point.
-
 nonisolated struct AdsResponse: Decodable, Sendable {
     let hasConsent: Bool?
     let isPersonal: Bool?
@@ -83,10 +80,7 @@ nonisolated struct AdResponse: Decodable, Sendable {
 }
 
 nonisolated extension Ad {
-    /// Image paths in the feed are relative to a CDN base. Photos use the base from the brief, which crops to 4:3.
     private static let photoBaseURL = URL(string: "https://images.finncdn.no/dynamic/480x360c/")!
-    /// That crop clips wide logos, so they are requested at their own aspect ratio instead.
-    /// Not in the brief: found by testing the CDN.
     private static let logoBaseURL = URL(string: "https://images.finncdn.no/dynamic/480w/")!
 
     init(response: AdResponse) {
@@ -94,7 +88,6 @@ nonisolated extension Ad {
         let imageBaseURL = imageStyle == .logo ? Self.logoBaseURL : Self.photoBaseURL
         self.init(
             id: response.id,
-            // Only `id` and `ad-type` are guaranteed by the backend, so an untitled ad is shown rather than dropped.
             title: response.description ?? "",
             location: response.location,
             price: response.price?.value,

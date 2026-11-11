@@ -1,8 +1,6 @@
 import UIKit
 
 actor ImageLoader {
-    // One cache for the whole app. The SwiftUI environment default points here, because an
-    // `@Entry` default built inline would create a fresh, empty cache on every read.
     static let shared = ImageLoader()
 
     private let cache = NSCache<NSURL, UIImage>()
@@ -16,10 +14,7 @@ actor ImageLoader {
         return image
     }
 
-    /// For bytes that are already on the device, such as a saved favorite.
     func image(from data: Data) async throws -> UIImage {
-        // UIKit normally decodes an image lazily on first draw, which means on the main
-        // thread in the middle of scrolling. Decoding here keeps that work off the main thread.
         guard let image = await UIImage(data: data)?.byPreparingForDisplay() else {
             throw URLError(.cannotDecodeContentData)
         }
