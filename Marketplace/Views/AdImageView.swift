@@ -14,7 +14,6 @@ struct AdImageView: View {
     @State private var phase: Phase = .loading
 
     var body: some View {
-        // Fixed 4:3 tile, so the layout doesn't jump when the image arrives.
         tileColor
             .aspectRatio(4 / 3, contentMode: .fit)
             .overlay { content }
@@ -32,7 +31,7 @@ struct AdImageView: View {
     private var content: some View {
         switch phase {
         case .loading:
-            EmptyView()
+            ProgressView()
         case .loaded(let image):
             Image(uiImage: image)
                 .resizable()
@@ -49,7 +48,6 @@ struct AdImageView: View {
         do {
             phase = .loaded(try await ImageLoader.shared.image(for: url, storedData: storedData))
         } catch {
-            // Scrolled away mid-load. That's not a failed image.
             guard !Task.isCancelled else { return }
             phase = .failed
         }
