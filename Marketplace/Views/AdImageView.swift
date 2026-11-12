@@ -26,8 +26,10 @@ struct AdImageView: View {
     }
 
     // Logos are drawn for light backgrounds, so they always sit on white.
+    // The photo tile must differ from both the card and the screen behind it, or a card
+    // without an image loses its top edge.
     private var tileColor: Color {
-        style == .logo ? .white : Color(uiColor: .tertiarySystemGroupedBackground)
+        style == .logo ? .white : Color(uiColor: .systemGray5)
     }
 
     @ViewBuilder
