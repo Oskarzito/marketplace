@@ -14,20 +14,18 @@ struct AdImageView: View {
     @State private var phase: Phase = .loading
 
     var body: some View {
-        // The tile fixes the 4:3 size up front, so the layout doesn't jump as images arrive.
+        // Fixed 4:3 tile, so the layout doesn't jump when the image arrives.
         tileColor
             .aspectRatio(4 / 3, contentMode: .fit)
             .overlay { content }
-            // A "fill" image can overflow its tile. The card rounds the corners.
             .clipped()
             .task(id: url) {
                 await load()
             }
     }
 
-    // Logos are drawn for light backgrounds, so they always sit on white.
-    // The photo tile must differ from both the card and the screen behind it, or a card
-    // without an image loses its top edge.
+    // Logos are made for light backgrounds, so they always sit on white.
+    // The photo tile has to stand out from both the card and the screen, or a card without an image loses its top edge.
     private var tileColor: Color {
         style == .logo ? .white : Color(uiColor: .systemGray5)
     }
@@ -53,7 +51,7 @@ struct AdImageView: View {
         do {
             phase = .loaded(try await ImageLoader.shared.image(for: url, storedData: storedData))
         } catch {
-            // The row scrolled away mid-load; that is not a failed image.
+            // Scrolled away mid-load. That's not a failed image.
             guard !Task.isCancelled else { return }
             phase = .failed
         }

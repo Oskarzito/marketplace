@@ -5,9 +5,7 @@ struct AdsListView: View {
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
-    // At accessibility text sizes two columns are too narrow for the text, so use one.
-    // Top alignment: by default a card shorter than its row (an ad without a price) is centered,
-    // which pushes its image and heart below its neighbour's.
+    // Top aligned. Otherwise a shorter card (no price line) gets centered in its row and sits lower than its neighbour.
     private var columns: [GridItem] {
         dynamicTypeSize.isAccessibilitySize
             ? [GridItem(.flexible(), alignment: .top)]
@@ -17,20 +15,19 @@ struct AdsListView: View {
     var body: some View {
         NavigationStack {
             content
-                // Cards sit on a grouped background so they stand out, whatever colour their image has.
                 .background(Color(uiColor: .systemGroupedBackground))
                 .navigationDestination(for: Ad.self) { ad in
                     AdDetailView(ad: ad, viewModel: viewModel)
                 }
                 .navigationTitle("Marketplace")
-                // A large title collapses while scrolling and slides under the picker below it.
+                // Inline, because a large title slid under the picker while scrolling.
                 .navigationBarTitleDisplayMode(.inline)
                 .safeAreaInset(edge: .top) {
                     filterPicker
                 }
         }
         .task {
-            // Favorites come from disk and are quick; load them first so hearts are right before the network answers.
+            // Favorites are a quick read from disk. Load them first so the hearts are right before the feed arrives.
             await viewModel.loadFavorites()
             await viewModel.loadAds()
         }
@@ -47,8 +44,8 @@ struct AdsListView: View {
         .background(.bar)
     }
 
-    // Both lists stay alive and only one is shown. Switching between them with an if/else
-    // would rebuild the list each time and lose its scroll position.
+    // Both lists stay alive and we only show one, so each keeps its scroll position.
+    // An if/else would rebuild the list on every switch.
     private var content: some View {
         ZStack {
             allAdsContent
@@ -62,7 +59,7 @@ struct AdsListView: View {
     private var allAdsContent: some View {
         switch viewModel.loadState {
         case .loading:
-            // Without filling the screen the picker inset attaches to the small spinner, mid-screen.
+            // Fill the screen, otherwise the picker above attaches to the small spinner and ends up mid-screen.
             ProgressView()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         case .failed(let message):
@@ -83,7 +80,6 @@ struct AdsListView: View {
         }
     }
 
-    // Favorites are saved on the device, so this tab never depends on the load state of the feed.
     @ViewBuilder
     private var favoritesContent: some View {
         if viewModel.favorites.isEmpty {
@@ -115,8 +111,6 @@ struct AdsListView: View {
 }
 
 private extension View {
-    /// Hides a view without removing it, so it keeps its state. A hidden view takes no touches
-    /// and is skipped by VoiceOver.
     func shown(_ isShown: Bool) -> some View {
         opacity(isShown ? 1 : 0)
             .allowsHitTesting(isShown)

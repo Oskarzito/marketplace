@@ -7,17 +7,15 @@ struct AdCardView: View {
     let onToggleFavorite: () -> Void
 
     var body: some View {
-        // The heart sits beside the link, not inside it: tapping it favorites the ad instead of
-        // opening it, and VoiceOver keeps it as its own control.
+        // The heart is next to the link, not inside it. That way tapping it favorites instead of
+        // opening the ad, and VoiceOver treats it as its own control.
         ZStack(alignment: .topTrailing) {
             NavigationLink(value: ad) {
                 VStack(alignment: .leading, spacing: 0) {
-                    // The photo says nothing VoiceOver needs; the text below describes the ad.
                     AdImageView(url: ad.imageURL, storedData: imageData, style: ad.imageStyle)
                         .accessibilityHidden(true)
 
                     VStack(alignment: .leading, spacing: 6) {
-                        // Reserving two lines keeps card heights equal whatever the title length.
                         Text(ad.title)
                             .font(.subheadline)
                             .lineLimit(2, reservesSpace: true)
@@ -35,7 +33,7 @@ struct AdCardView: View {
                     }
                     .padding(10)
                 }
-                // Fill the row height, so a card without a price line is as tall as its neighbour.
+                // Fill the row, so a card without a price line is as tall as its neighbour.
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 .background(Color(uiColor: .secondarySystemGroupedBackground))
                 .clipShape(RoundedRectangle(cornerRadius: 12))
@@ -50,7 +48,6 @@ struct AdCardView: View {
     }
 }
 
-/// The plain button style shows almost nothing while pressed, so the card gives its own feedback.
 private struct CardPressStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label

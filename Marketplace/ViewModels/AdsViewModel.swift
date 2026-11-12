@@ -31,8 +31,7 @@ final class AdsViewModel {
     }
 
     func loadAds() async {
-        // Pull-to-refresh shows its own spinner. Swapping the grid for a full-screen
-        // spinner would also cancel the refresh task, because the view it hangs on disappears.
+        // Only the first load gets a full-screen spinner. Doing that during a pull-to-refresh would cancel the refresh.
         if ads.isEmpty {
             loadState = .loading
         }
@@ -40,12 +39,12 @@ final class AdsViewModel {
             ads = try await service.fetchAds()
             loadState = .loaded
         } catch {
-            // A failed refresh keeps the ads already on screen.
+            // If a refresh fails, keep showing the ads we already have.
             guard ads.isEmpty else {
                 loadState = .loaded
                 return
             }
-            // A cancelled load (the view went away) is not an error worth showing.
+            // A cancelled load (the view went away) isn't an error, so don't show one.
             loadState = Task.isCancelled ? .loading : .failed(error.localizedDescription)
         }
     }
@@ -58,7 +57,6 @@ final class AdsViewModel {
         favorites.contains { $0.ad.id == ad.id }
     }
 
-    /// The image saved with a favorite, so it can be shown without the network.
     func savedImageData(for ad: Ad) -> Data? {
         favorites.first { $0.ad.id == ad.id }?.imageData
     }
@@ -71,12 +69,11 @@ final class AdsViewModel {
         }
     }
 
-    // The heart flips immediately; saving to disk happens afterwards.
     private func addFavorite(_ ad: Ad) {
         favorites.insert(Favorite(ad: ad, imageData: nil), at: 0)
         Task {
             let imageData = await downloadImageData(for: ad)
-            // The user may have tapped the heart again while the image was downloading.
+            // If the heart was tapped off again while the image downloaded, skip saving.
             guard isFavorite(ad) else { return }
             do {
                 try await store.add(ad, imageData: imageData)
@@ -100,7 +97,7 @@ final class AdsViewModel {
         }
     }
 
-    // A favorite is still saved without its image if the download fails; the card shows a placeholder.
+    // If the download fails we still save the favorite, just without an image.
     private func downloadImageData(for ad: Ad) async -> Data? {
         guard let url = ad.imageURL else { return nil }
         return try? await imageLoader.data(for: url)

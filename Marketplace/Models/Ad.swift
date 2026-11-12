@@ -9,7 +9,7 @@ nonisolated struct Ad: Identifiable, Hashable, Codable, Sendable {
     let id: String
     let title: String
     let location: String?
-    /// Whole NOK. `nil` for ads without a price, such as job ads.
+    // Whole NOK. `nil` when the ad has no price, like job ads.
     let price: Int?
     let imageURL: URL?
     let imageStyle: ImageStyle

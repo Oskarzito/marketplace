@@ -5,7 +5,8 @@ actor ImageLoader {
 
     private let cache = NSCache<NSURL, UIImage>()
 
-    /// `storedData` is the image saved with a favorite. It is used instead of the network, so the image works offline.
+    // `storedData` is the image saved with a favorite. If it's there we use it instead of the network,
+    // which is what makes favorites work offline.
     func image(for url: URL?, storedData: Data?) async throws -> UIImage {
         if let url, let cached = cache.object(forKey: url as NSURL) {
             return cached

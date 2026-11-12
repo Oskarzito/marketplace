@@ -17,12 +17,12 @@ nonisolated struct URLSessionAdsService: AdsService {
         return try await Self.decodeAds(from: data)
     }
 
-    // The feed may grow much larger than today's 20 ads. `@concurrent` keeps decoding off the
-    // main actor, where this service is called from under the project's default isolation.
+    // Today's feed has 20 ads but it can grow a lot. `@concurrent` keeps the decoding off the
+    // main actor, which is where this is called from by default.
     @concurrent
     private static func decodeAds(from data: Data) async throws -> [Ad] {
         let decoder = JSONDecoder()
-        // The nested `content` object uses snake_case keys.
+        // `content` has snake_case keys.
         decoder.keyDecodingStrategy = .convertFromSnakeCase
         return try decoder.decode(AdsResponse.self, from: data).items.map(Ad.init(response:))
     }
