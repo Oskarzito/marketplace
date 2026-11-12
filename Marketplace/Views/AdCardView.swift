@@ -41,12 +41,22 @@ struct AdCardView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 12))
                 .accessibilityElement(children: .combine)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(CardPressStyle())
 
             FavoriteButton(isFavorite: isFavorite, action: onToggleFavorite)
                 .background(.regularMaterial, in: Circle())
                 .padding(6)
         }
+    }
+}
+
+/// The plain button style shows almost nothing while pressed, so the card gives its own feedback.
+private struct CardPressStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .opacity(configuration.isPressed ? 0.75 : 1)
+            .scaleEffect(configuration.isPressed ? 0.97 : 1)
+            .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
     }
 }
 
