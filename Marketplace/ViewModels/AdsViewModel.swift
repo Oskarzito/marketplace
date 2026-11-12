@@ -5,7 +5,6 @@ import Observation
 @Observable
 final class AdsViewModel {
     enum LoadState {
-        case idle
         case loading
         case loaded
         case failed(String)
@@ -19,7 +18,7 @@ final class AdsViewModel {
     var filter: Filter = .all
     private(set) var ads: [Ad] = []
     private(set) var favorites: [Favorite] = []
-    private(set) var loadState: LoadState = .idle
+    private(set) var loadState: LoadState = .loading
 
     private let service: any AdsService
     private let store: any FavoritesStore
@@ -47,7 +46,7 @@ final class AdsViewModel {
                 return
             }
             // A cancelled load (the view went away) is not an error worth showing.
-            loadState = Task.isCancelled ? .idle : .failed(error.localizedDescription)
+            loadState = Task.isCancelled ? .loading : .failed(error.localizedDescription)
         }
     }
 

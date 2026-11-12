@@ -60,7 +60,7 @@ struct AdsListView: View {
     @ViewBuilder
     private var allAdsContent: some View {
         switch viewModel.loadState {
-        case .idle, .loading:
+        case .loading:
             // Without filling the screen the picker inset attaches to the small spinner, mid-screen.
             ProgressView()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
