@@ -22,7 +22,6 @@ nonisolated struct URLSessionAdsService: AdsService {
     @concurrent
     private static func decodeAds(from data: Data) async throws -> [Ad] {
         let decoder = JSONDecoder()
-        // `content` has snake_case keys.
         decoder.keyDecodingStrategy = .convertFromSnakeCase
         return try decoder.decode(AdsResponse.self, from: data).items.map(Ad.init(response:))
     }
