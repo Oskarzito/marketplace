@@ -5,20 +5,26 @@ actor ImageLoader {
 
     private let cache = NSCache<NSURL, UIImage>()
 
-    func image(for url: URL) async throws -> UIImage {
-        if let cached = cache.object(forKey: url as NSURL) {
+    /// `storedData` is the image saved with a favorite. It is used instead of the network, so the image works offline.
+    func image(for url: URL?, storedData: Data?) async throws -> UIImage {
+        if let url, let cached = cache.object(forKey: url as NSURL) {
             return cached
         }
-        let image = try await image(from: data(for: url))
-        cache.setObject(image, forKey: url as NSURL)
-        return image
-    }
-
-    func image(from data: Data) async throws -> UIImage {
+        let data: Data
+        if let storedData {
+            data = storedData
+        } else if let url {
+            data = try await self.data(for: url)
+        } else {
+            throw URLError(.badURL)
+        }
         // UIKit normally decodes an image lazily on first draw, which can mean on the main
         // thread in the middle of scrolling. Decoding here keeps that work off the main thread.
         guard let image = await UIImage(data: data)?.byPreparingForDisplay() else {
             throw URLError(.cannotDecodeContentData)
+        }
+        if let url {
+            cache.setObject(image, forKey: url as NSURL)
         }
         return image
     }

@@ -8,7 +8,6 @@ struct AdImageView: View {
     }
 
     let url: URL?
-    /// Bytes saved with a favorite. When present they are used instead of the network, so the image works offline.
     let storedData: Data?
     let style: Ad.ImageStyle
 
@@ -50,13 +49,7 @@ struct AdImageView: View {
 
     private func load() async {
         do {
-            if let storedData {
-                phase = .loaded(try await ImageLoader.shared.image(from: storedData))
-            } else if let url {
-                phase = .loaded(try await ImageLoader.shared.image(for: url))
-            } else {
-                phase = .failed
-            }
+            phase = .loaded(try await ImageLoader.shared.image(for: url, storedData: storedData))
         } catch {
             // The row scrolled away mid-load; that is not a failed image.
             guard !Task.isCancelled else { return }
