@@ -40,7 +40,7 @@ There is deliberately no repository layer: the view model combines two small pro
 | `FileFavoritesStore` | `actor` | serializes file access without locks |
 | `ImageLoader` | `actor` | guards the cache; decodes off the main thread |
 
-**Assumptions.** The feed has no currency field, so prices are shown as NOK, formatted for Norway. The feed holds 20 ads although `size` says 200, and the brief gives no paging contract, so there is no pagination. Ads without a price (job ads) show no price line.
+**Assumptions.** The feed has no currency field, so prices are shown as NOK, formatted for Norway.
 
 ## What I am particularly proud of
 
