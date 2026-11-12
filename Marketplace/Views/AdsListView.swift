@@ -47,13 +47,14 @@ struct AdsListView: View {
         .background(.bar)
     }
 
-    @ViewBuilder
+    // Both lists stay alive and only one is shown. Switching between them with an if/else
+    // would rebuild the list each time and lose its scroll position.
     private var content: some View {
-        switch viewModel.filter {
-        case .all:
+        ZStack {
             allAdsContent
-        case .favorites:
+                .shown(viewModel.filter == .all)
             favoritesContent
+                .shown(viewModel.filter == .favorites)
         }
     }
 
@@ -110,6 +111,16 @@ struct AdsListView: View {
             }
             .padding(.horizontal, 16)
         }
+    }
+}
+
+private extension View {
+    /// Hides a view without removing it, so it keeps its state. A hidden view takes no touches
+    /// and is skipped by VoiceOver.
+    func shown(_ isShown: Bool) -> some View {
+        opacity(isShown ? 1 : 0)
+            .allowsHitTesting(isShown)
+            .accessibilityHidden(!isShown)
     }
 }
 
