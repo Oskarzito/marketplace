@@ -59,7 +59,7 @@ Loads started by `.task` are cancelled with the view, and cancellation is not sh
 - The image loader is slim: no de-duplication of simultaneous requests, no disk cache for non-favorites, and a broken image is requested again every time its card reappears.
 - A favorite saved while offline has no image. A failed pull-to-refresh and a failed favorite save are silent.
 - The favorites file is rewritten as a whole on each change and has no versioning, so a future incompatible change to `Ad` would lose saved favorites.
-- Job cards leave a small gap between title and location, because every title reserves two lines.
+- Every title reserves two lines and cards in a row share one height, so a card with a short title or no price line (job ads) shows some empty space.
 
 ## With more time
 
