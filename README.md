@@ -42,6 +42,12 @@ There is deliberately no repository layer: the view model combines two small pro
 
 **Assumptions.** The feed has no currency field, so prices are shown as NOK, formatted for Norway. The feed holds 20 ads although `size` says 200, and the brief gives no paging contract, so there is no pagination. Ads without a price (job ads) show no price line.
 
+## What I am particularly proud of
+
+- Concurrency is explicit under Swift 6 with default main-actor isolation, and the project builds without warnings.
+- App works rather well in dark mode. 
+- 
+
 ## Improvements
 
 - There are no automated tests. The decoding and the view model are the first things I would cover.
