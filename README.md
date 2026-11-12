@@ -45,8 +45,6 @@ There is deliberately no repository layer: the view model combines two small pro
 ## What I am particularly proud of
 
 - Concurrency is explicit under Swift 6 with default main-actor isolation, and the project builds without warnings.
-- App works rather well in dark mode. 
-- 
 
 ## Improvements
 
