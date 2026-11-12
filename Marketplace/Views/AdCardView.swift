@@ -7,8 +7,7 @@ struct AdCardView: View {
     let onToggleFavorite: () -> Void
 
     var body: some View {
-        // The heart is next to the link, not inside it. That way tapping it favorites instead of
-        // opening the ad, and VoiceOver treats it as its own control.
+        // The heart is next to the link, not inside it. That way tapping it favorites instead of opening the ad.
         ZStack(alignment: .topTrailing) {
             NavigationLink(value: ad) {
                 VStack(alignment: .leading, spacing: 0) {
